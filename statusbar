@@ -1,0 +1,105 @@
+#! /bin/bash
+
+START=0
+PREVIDLE=0
+PREVTOTAL=0
+MEMTOTAL=$(grep MemTotal < /proc/meminfo | awk '{print $2}')
+PREVRX=0
+PREVTX=0
+PREVREAD=0
+PREVWRITE=0
+
+function time_diff
+{
+	[ $((10#$END-10#$START)) -gt 0 ] && DIFFTIME=$((((10#$END-10#$START)/100000+5)/10)) || DIFFTIME=$((((1000000000-10#$START+10#$END)/100000+5)/10))
+}
+
+function si_format
+{
+	if [ $1 -lt 1000 ]
+	then
+		echo -n "$(printf "%3s  " $1)"
+	elif [ $1 -lt 1000000 ]
+	then
+		echo -n "$(printf "%3s k" $((($1/100+5)/10)))"
+	else
+		echo -n "$(printf "%3s M" $((($1/100000+5)/10)))"
+	fi
+}
+
+function cpu_use
+{
+	TIMES=($(grep 'cpu ' < /proc/stat))
+	IDLE=${TIMES[4]}
+	TOTAL=$(IFS=+; echo "$((${TIMES[*]:1}))") # Sum values
+	
+	DIFFIDLE=$(($IDLE-$PREVIDLE))
+	DIFFTOTAL=$(($TOTAL-$PREVTOTAL))
+
+	PREVIDLE=$IDLE
+	PREVTOTAL=$TOTAL
+
+	CPUUSE=$(((1000*($DIFFTOTAL-$DIFFIDLE)/$DIFFTOTAL+5)/10))
+}
+
+function ram_use
+{
+	MEMFREE=$(grep MemFree < /proc/meminfo | awk '{print $2}')
+	MEMUSED=$(((1000*($MEMTOTAL-$MEMFREE)/$MEMTOTAL+5)/10))
+}
+
+function net_use
+{
+	RX=${NETINFO[1]}
+	TX=${NETINFO[9]}
+	
+	RATERX=$(((10000*($RX-$PREVRX)/(1000+$DIFFTIME)+5)/10))
+	RATETX=$(((10000*($TX-$PREVTX)/(1000+$DIFFTIME)+5)/10))
+
+	FORMATRX="$(si_format $RATERX)B/s"
+	FORMATTX="$(si_format $RATETX)B/s"
+
+	PREVRX=$RX
+	PREVTX=$TX
+}
+
+function disk_use
+{
+	SECTORSIZE=512
+
+	READ=${DISKINFO[5]}
+	WRITE=${DISKINFO[9]}
+	
+	RATEREAD=$(((10000*$SECTORSIZE*($READ-$PREVREAD)/(1000+$DIFFTIME)+5)/10))
+	RATEWRITE=$(((10000*$SECTORSIZE*($WRITE-$PREVWRITE)/(1000+$DIFFTIME)+5)/10))
+
+	FORMATREAD="$(si_format $RATEREAD)B/s"
+	FORMATWRITE="$(si_format $RATEWRITE)B/s"
+
+	PREVREAD=$READ
+	PREVWRITE=$WRITE
+}
+
+while true; do
+	END=$(date +%N)
+	NETINFO=($(grep 'enp7s0' < /proc/net/dev))
+	DISKINFO=($(grep ' sda ' < /proc/diskstats))
+	CPUTEMP="$(sensors | grep Package | awk '{print $4}' | cut -c2-3) °C"
+	cpu_use
+	ram_use
+	time_diff
+	START=$END
+	net_use
+	disk_use
+	xsetroot -name "
+	$([ $(<~/.vars/updates) -ne 0 ] && echo -ne "\x02\U0001F4E6 $(<~/.vars/updates)|")
+	$(echo -ne "\x03\U0001F3B2\U0001F468")|
+	$(echo -ne "\x04\U0001F321") $CPUTEMP|
+	$(echo -ne "\U0001F4BD") $FORMATREAD $FORMATWRITE|
+	$(echo -ne "\U0001F310") $FORMATRX $FORMATTX|
+	$(printf "\U0001F40F%3s %%" $MEMUSED)|
+	$(printf "\U0001F5A5%3s %%" $CPUUSE)|
+	$(<~/.vars/forecast)|
+	$(<~/.vars/clockemoji) $(date)"
+	sleep 1s
+done

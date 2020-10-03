@@ -1,0 +1,44 @@
+#! /bin/bash
+
+APIKEY=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuaXRvZWxwb3J0ZXJpdG9AZ21haWwuY29tIiwianRpIjoiY2Y3NjFkNTctNTFmYS00ODVlLWFhOTAtYjU3YTFkNWIxNWNjIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1ODk4MzA2ODQsInVzZXJJZCI6ImNmNzYxZDU3LTUxZmEtNDg1ZS1hYTkwLWI1N2ExZDViMTVjYyIsInJvbGUiOiIifQ.0vHoUmsbCaQSyNTJBCva8zyh3cEK5WhhI8kuiy4bQDc
+URL=https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/03014/?api_key=${APIKEY}
+DATE=$(date +%FT00:00:00)
+HOUR=$(date +%H)
+JSON=$(curl -s $URL | jq '.datos' | xargs curl -s)
+
+case $(echo $JSON | jq -r --arg DATE $DATE --arg HOUR $HOUR '.[].prediccion.dia[] | select(.fecha == $DATE).estadoCielo[] | select(.periodo == $HOUR).value') in
+	11*)
+		echo -n "☀ "
+		;;
+	12* | 17*)
+		echo -n "🌤 "
+		;;
+	13*)
+		echo -n "⛅ "
+		;;
+	14*)
+		echo -n "🌥 "
+		;;
+	15* | 16*)
+		echo -n "☁ "
+		;;
+	23* | 24* | 43* | 44*)
+		echo -n "🌦 "
+		;;
+	25* | 26* | 45* | 46*)
+		echo -n "🌧 "
+		;;
+	61* | 62* | 63* | 64*)
+		echo -n "⛈ "
+		;;
+	51* | 52* | 53* | 54*)
+		echo -n "🌩 "
+		;;
+	33* | 34* | 35* | 36* | 71* | 72* | 73* | 74*)
+		echo -n "🌨 "
+		;;
+	81* | 82* | 83*)
+		echo -n "🌫 "
+		;;			
+esac > ~/.vars/forecast
+echo -n "$(echo $JSON | jq --arg DATE $DATE --arg HOUR $HOUR '.[].prediccion.dia[] | select(.fecha == $DATE).temperatura[] | select(.periodo == $HOUR).value | tonumber') °C" >> ~/.vars/forecast

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# yay -Sy && yay -Qu > /home/juan/Scripts/yayQu
+# grep -E '^[[:alnum:]]' /home/juan/Scripts/yayQu | wc -l > /home/juan/.vars/updates
+
+yay -Sy && yay -Qu | grep -E '^[[:alnum:]]' | wc -l > /home/juan/.vars/updates
