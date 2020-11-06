@@ -1,0 +1,3 @@
+#!/bin/bash
+
+qemu-system-x86_64 -drive file=Windows.img,format=qcow2 -m 4G -enable-kvm
