@@ -11,7 +11,7 @@ case $(echo $JSON | jq -r --arg DATE $DATE --arg HOUR $HOUR '.[].prediccion.dia[
 		echo -n "☀ "
 		;;
 	12* | 17*)
-		echo -n "🌤  "
+		echo -n "🌤 "
 		;;
 	13*)
 		echo -n "⛅ "
