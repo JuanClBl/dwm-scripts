@@ -2,7 +2,7 @@
 
 OLD_PRIMARY=$(xclip -o)
 OLD_CLIPBOARD=$(xclip -o -selection clipboard)
-EMOJI=$(dmenu -l 20 < ~/.vars/emojis | awk '{printf $1}')
+EMOJI=$(dmenu -c -g 2 -l 20 < ~/.vars/emojis | awk '{printf $1}')
 echo -n $EMOJI | xclip
 echo -n $EMOJI | xclip -selection clipboard
 xdotool key shift+Insert
