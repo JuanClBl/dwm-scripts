@@ -1,7 +1,7 @@
 #! /bin/bash
 
 APIKEY=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuaXRvZWxwb3J0ZXJpdG9AZ21haWwuY29tIiwianRpIjoiY2Y3NjFkNTctNTFmYS00ODVlLWFhOTAtYjU3YTFkNWIxNWNjIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1ODk4MzA2ODQsInVzZXJJZCI6ImNmNzYxZDU3LTUxZmEtNDg1ZS1hYTkwLWI1N2ExZDViMTVjYyIsInJvbGUiOiIifQ.0vHoUmsbCaQSyNTJBCva8zyh3cEK5WhhI8kuiy4bQDc
-URL=https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/08101/?api_key=${APIKEY}
+URL=https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/$(<~/.vars/postcode)/?api_key=${APIKEY}
 DATE=$(date +%FT00:00:00)
 HOUR=$(date +%H)
 JSON=$(curl -s $URL | jq '.datos' | xargs curl -s)

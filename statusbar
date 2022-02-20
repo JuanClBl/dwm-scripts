@@ -92,14 +92,14 @@ while true; do
 	net_use
 	disk_use
 	xsetroot -name "
-	$([ $(<~/.vars/updates) -ne 0 ] && echo -ne "\x02\U0001F4E6 $(<~/.vars/updates)|")
-	$(echo -ne "\x03\U0001F3B2\U0001F468")|
-	$(echo -ne "\x04\U0001F321") $CPUTEMP|
+	$([ $(<~/.vars/updates) -ne 0 ] && echo -ne "\x01\U0001F4E6 $(<~/.vars/updates)\x02|")
+	$(echo -ne "\x03\U0001F3B2\U0001F468\x04")|
+	$(echo -ne "\x05\U0001F321") $CPUTEMP|
 	$(echo -ne "\U0001F4BD") $FORMATREAD $FORMATWRITE|
 	$(echo -ne "\U0001F310") $FORMATRX $FORMATTX|
 	$(printf "\U0001F40F%3s %%" $MEMUSED)|
-	$(printf "\U0001F5A5%3s %%" $CPUUSE)|
-	$(<~/.vars/forecast)|
+	$(printf "\U0001F5A5%3s %%\x06" $CPUUSE)|
+	$(echo -ne "\x07")$(<~/.vars/forecast)$(echo -ne "\x08")|
 	$(<~/.vars/clockemoji) $(date)"
 	sleep 1s
 done
