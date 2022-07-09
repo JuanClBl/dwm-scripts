@@ -3,4 +3,6 @@
 # yay -Sy && yay -Qu > /home/juan/Scripts/yayQu
 # grep -E '^[[:alnum:]]' /home/juan/Scripts/yayQu | wc -l > /home/juan/.vars/updates
 
+until ping -c 1 -W 0.1 google.com; do :; done
+
 yay -Sy && yay -Qu | grep -E '^[[:alnum:]]' | wc -l > /home/juan/.vars/updates
